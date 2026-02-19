@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+  <title>Prototype — Add Your App Name</title>
+  
+  <!-- PWA Meta Tags -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="App Name">
+  <meta name="theme-color" content="#FFFFFF">
+  <link rel="manifest" href="manifest.json">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    /* === DESIGN TOKENS === */
+    :root {
+      /* === PROJECT TOKENS — customize per project === */
+      --primary: #000;
+      --primary-dark: #000;
+      --text: #000000;
+      --text-sec: rgba(0,0,0,0.6);
+      --border: #E5E5EA;
+      --accent-bg: #f0f0f0;
+      --r-pill: 999px;
+      --r-btn: 16px;
+      --r-card: 20px;
+      --font: 'Outfit', -apple-system, sans-serif;
+      
+      /* Safe area insets */
+      --sat: env(safe-area-inset-top);
+      --sab: env(safe-area-inset-bottom);
+      --sal: env(safe-area-inset-left);
+      --sar: env(safe-area-inset-right);
+    }
+
+    /* === RESET & BASE === */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: var(--font);
+      background: #f5f5f7;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      min-height: 100dvh;
+      padding: 40px 20px;
+    }
+
+    /* === PHONE FRAME === */
+    .phone {
+      width: 375px;
+      height: 812px;
+      background: white;
+      border-radius: 50px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.05);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Fullscreen on mobile */
+    @media (max-width: 430px) {
+      body {
+        padding: 0;
+      }
+      .phone {
+        width: 100vw;
+        height: 100vh;
+        height: 100dvh;
+        border-radius: 0;
+        box-shadow: none;
+      }
+    }
+
+    /* === STATUS BAR === */
+    .status-bar {
+      height: calc(44px + var(--sat));
+      padding-top: var(--sat);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-left: 24px;
+      padding-right: 24px;
+      font-size: 15px;
+      font-weight: 600;
+      position: relative;
+      z-index: 100;
+      flex-shrink: 0;
+    }
+
+    .status-bar.light {
+      color: white;
+    }
+
+    .status-bar.dark {
+      color: black;
+    }
+
+    .status-icons {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+    }
+
+    .status-icons svg {
+      width: auto;
+      height: 12px;
+    }
+
+    /* === HOME INDICATOR === */
+    .home-indicator {
+      position: absolute;
+      bottom: calc(8px + var(--sab));
+      left: 50%;
+      transform: translateX(-50%);
+      width: 134px;
+      height: 5px;
+      border-radius: 100px;
+      z-index: 100;
+      pointer-events: none;
+    }
+
+    .home-indicator.black {
+      background: rgba(0,0,0,0.3);
+    }
+
+    .home-indicator.white {
+      background: rgba(255,255,255,0.3);
+    }
+
+    /* === SCREEN CONTAINER === */
+    .screen-container {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: none;
+      flex-direction: column;
+      padding: 0 24px calc(34px + var(--sab)) 24px;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .screen.active {
+      display: flex;
+    }
+
+    /* === SCREEN TRANSITIONS === */
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes slideOut {
+      from {
+        transform: translateX(0);
+        opacity: 1;
+      }
+      to {
+        transform: translateX(-30%);
+        opacity: 0;
+      }
+    }
+
+    @keyframes slideInBack {
+      from {
+        transform: translateX(-30%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes slideOutBack {
+      from {
+        transform: translateX(0);
+        opacity: 1;
+      }
+      to {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+    }
+
+    .screen.slide-in {
+      animation: slideIn 320ms cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .screen.slide-out {
+      animation: slideOut 320ms cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .screen.slide-in-back {
+      animation: slideInBack 320ms cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .screen.slide-out-back {
+      animation: slideOutBack 320ms cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* === COMMON COMPONENTS === */
+
+    /* Buttons */
+    .btn {
+      height: 52px;
+      border-radius: var(--r-pill);
+      border: none;
+      font-family: var(--font);
+      font-size: 17px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      text-decoration: none;
+      width: 100%;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:active {
+      background: var(--primary-dark);
+      transform: scale(0.98);
+    }
+
+    .btn-secondary {
+      background: var(--accent-bg);
+      color: var(--text);
+    }
+
+    .btn-secondary:active {
+      background: var(--border);
+      transform: scale(0.98);
+    }
+
+    .btn-sso {
+      background: white;
+      color: var(--text);
+      border: 1px solid var(--border);
+      position: relative;
+    }
+
+    .btn-sso svg {
+      width: 20px;
+      height: 20px;
+      position: absolute;
+      left: 16px;
+    }
+
+    .btn-sso:active {
+      background: #f8f8f8;
+      transform: scale(0.98);
+    }
+
+    /* Input fields */
+    .input-field {
+      height: 52px;
+      border-radius: var(--r-btn);
+      border: 1px solid var(--border);
+      padding: 0 16px;
+      font-family: var(--font);
+      font-size: 17px;
+      background: white;
+      color: var(--text);
+      width: 100%;
+    }
+
+    .input-field::placeholder {
+      color: var(--text-sec);
+    }
+
+    .input-field:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    /* Divider */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin: 24px 0;
+      color: var(--text-sec);
+      font-size: 15px;
+    }
+
+    .divider::before,
+    .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* Back button */
+    .back-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--accent-bg);
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .back-btn:active {
+      background: var(--border);
+    }
+
+    .back-btn svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    /* === ADD YOUR SCREEN-SPECIFIC CSS HERE === */
+    
+    /* Placeholder screen styles */
+    .placeholder-content {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: var(--text-sec);
+      font-size: 17px;
+    }
+  </style>
+</head>
+<body>
+  <div class="phone">
+    <!-- Status Bar -->
+    <div class="status-bar dark" id="statusBar">
+      <div class="time">9:41</div>
+      <div class="status-icons">
+        <!-- Signal -->
+        <svg width="18" height="12" viewBox="0 0 18 12" fill="none">
+          <rect width="3" height="5" rx="1" fill="currentColor"/>
+          <rect x="5" y="2" width="3" height="7" rx="1" fill="currentColor"/>
+          <rect x="10" y="0" width="3" height="11" rx="1" fill="currentColor"/>
+          <rect x="15" y="0" width="3" height="12" rx="1" fill="currentColor"/>
+        </svg>
+        <!-- WiFi -->
+        <svg width="16" height="12" viewBox="0 0 16 12" fill="none">
+          <path d="M8 3.5C10.3 3.5 12.4 4.4 14 5.8L15.5 4.1C13.4 2.3 10.8 1.2 8 1.2C5.2 1.2 2.6 2.3 0.5 4.1L2 5.8C3.6 4.4 5.7 3.5 8 3.5ZM8 7.5C9.2 7.5 10.3 8 11.2 8.8L8 12L4.8 8.8C5.7 8 6.8 7.5 8 7.5Z" fill="currentColor"/>
+        </svg>
+        <!-- Battery -->
+        <svg width="25" height="12" viewBox="0 0 25 12" fill="none">
+          <rect x="0.5" y="0.5" width="21" height="11" rx="2.5" stroke="currentColor" fill="none"/>
+          <path d="M23 4V8C23.8 7.6 24 7 24 6C24 5 23.8 4.4 23 4Z" fill="currentColor"/>
+          <rect x="2" y="2" width="18" height="8" rx="1" fill="currentColor"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Screen Container -->
+    <div class="screen-container">
+      <!-- === ADD YOUR SCREENS HERE === -->
+      
+      <!-- Placeholder Screen -->
+      <div class="screen active" id="placeholder">
+        <div class="placeholder-content">
+          <div>
+            <div style="font-size: 24px; font-weight: 600; color: var(--text); margin-bottom: 8px;">
+              Ready to prototype
+            </div>
+            <div>Add your screens here</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Example: Screen Template
+      <div class="screen" id="screenName">
+        <button class="back-btn" onclick="goBack()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M15 18l-6-6 6-6"/>
+          </svg>
+        </button>
+        
+        <div style="flex: 1;">
+          // Your content here
+        </div>
+      </div>
+      -->
+    </div>
+
+    <!-- Home Indicator -->
+    <div class="home-indicator black" id="homeIndicator"></div>
+  </div>
+
+  <script>
+    // === NAVIGATION STATE MACHINE === //
+    
+    const navigationHistory = [];
+    let currentScreen = 'placeholder';
+
+    // Navigate to a screen (forward)
+    function navigate(screenId, statusBarTheme = 'dark', homeIndicatorTheme = 'black') {
+      const current = document.getElementById(currentScreen);
+      const next = document.getElementById(screenId);
+      
+      if (!next) {
+        console.error(`Screen "${screenId}" not found`);
+        return;
+      }
+
+      // Save current screen to history
+      navigationHistory.push({
+        id: currentScreen,
+        statusBar: document.getElementById('statusBar').className,
+        homeIndicator: document.getElementById('homeIndicator').className
+      });
+
+      // Animate out current screen
+      current.classList.add('slide-out');
+      
+      setTimeout(() => {
+        current.classList.remove('active', 'slide-out');
+        next.classList.add('active', 'slide-in');
+        
+        // Update status bar and home indicator
+        updateTheme(statusBarTheme, homeIndicatorTheme);
+        
+        setTimeout(() => {
+          next.classList.remove('slide-in');
+        }, 320);
+      }, 320);
+
+      currentScreen = screenId;
+      updateThemeColor(statusBarTheme);
+    }
+
+    // Go back to previous screen
+    function goBack() {
+      if (navigationHistory.length === 0) return;
+
+      const current = document.getElementById(currentScreen);
+      const previous = navigationHistory.pop();
+      const prev = document.getElementById(previous.id);
+
+      // Animate out current screen (reverse)
+      current.classList.add('slide-out-back');
+      
+      setTimeout(() => {
+        current.classList.remove('active', 'slide-out-back');
+        prev.classList.add('active', 'slide-in-back');
+        
+        // Restore previous theme
+        document.getElementById('statusBar').className = previous.statusBar;
+        document.getElementById('homeIndicator').className = previous.homeIndicator;
+        
+        setTimeout(() => {
+          prev.classList.remove('slide-in-back');
+        }, 320);
+      }, 320);
+
+      currentScreen = previous.id;
+      updateThemeColor(previous.statusBar.includes('light') ? 'light' : 'dark');
+    }
+
+    // Update status bar and home indicator themes
+    function updateTheme(statusBarTheme, homeIndicatorTheme) {
+      const statusBar = document.getElementById('statusBar');
+      const homeIndicator = document.getElementById('homeIndicator');
+      
+      statusBar.className = `status-bar ${statusBarTheme}`;
+      homeIndicator.className = `home-indicator ${homeIndicatorTheme}`;
+    }
+
+    // Update PWA theme-color meta tag
+    function updateThemeColor(theme) {
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+      if (metaThemeColor) {
+        metaThemeColor.setAttribute('content', theme === 'light' ? '#000000' : '#FFFFFF');
+      }
+    }
+
+    // === CAROUSEL HELPER (Touch + Mouse) === //
+    function initCarousel(container, onSwipe) {
+      let startX = 0;
+      let currentX = 0;
+      let isDragging = false;
+
+      const handleStart = (e) => {
+        startX = e.type.includes('mouse') ? e.pageX : e.touches[0].pageX;
+        isDragging = true;
+        container.style.transition = 'none';
+      };
+
+      const handleMove = (e) => {
+        if (!isDragging) return;
+        currentX = e.type.includes('mouse') ? e.pageX : e.touches[0].pageX;
+        const diff = currentX - startX;
+        container.style.transform = `translateX(${diff}px)`;
+      };
+
+      const handleEnd = () => {
+        if (!isDragging) return;
+        isDragging = false;
+        container.style.transition = 'transform 0.3s ease';
+        container.style.transform = '';
+        
+        const diff = currentX - startX;
+        const threshold = 50;
+        
+        if (Math.abs(diff) > threshold) {
+          onSwipe(diff > 0 ? 'right' : 'left');
+        }
+      };
+
+      container.addEventListener('mousedown', handleStart);
+      container.addEventListener('touchstart', handleStart);
+      container.addEventListener('mousemove', handleMove);
+      container.addEventListener('touchmove', handleMove);
+      container.addEventListener('mouseup', handleEnd);
+      container.addEventListener('touchend', handleEnd);
+      container.addEventListener('mouseleave', handleEnd);
+    }
+
+    // === ADD YOUR SCREEN-SPECIFIC JAVASCRIPT HERE === //
+    
+    // Example usage:
+    // navigate('screenName', 'light', 'white');
+    // goBack();
+    
+  </script>
+</body>
+</html>
