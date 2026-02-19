@@ -1,3 +1,16 @@
+---
+name: design-with-ai
+description: |
+  AI-assisted product design workflow — Figma API access, project context management,
+  structured design reviews, flow specs, feature ideation, and prototype generation.
+  Use when working on design projects, reviewing designs, building prototypes,
+  pulling Figma data, or any task involving product design collaboration.
+compatibility: Python 3 for Figma scripts. Optional FIGMA_ACCESS_TOKEN in .env for Figma API access.
+metadata:
+  version: "1.0"
+  author: Amy Pu
+---
+
 # Design Companion
 
 A workflow skill for AI-assisted product design. Load this file at the start of any design session to give your AI agent the full context on how to work with you.
